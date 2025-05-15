@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Iniciar Metabuscador",
+            "request": "launch",
+            "mainClass": "jade.Boot",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-gui",
+                "-agents",
+                "rma:jade.tools.rma.rma;agenteInterfaz:es.upm.metabuscador.agentes.AgenteInterfaz;agenteCoordinador:es.upm.metabuscador.agentes.AgenteCoordinador;agenteBuscador1:es.upm.metabuscador.agentes.AgenteBuscador1;agenteBuscador2:es.upm.metabuscador.agentes.AgenteBuscador2"
+            ],
+            "vmArgs": "-Dfile.encoding=UTF-8",
+            "classPaths": [
+                "bin", 
+                "lib/jade.jar",
+                "lib/commons-codec-1.3.jar"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}

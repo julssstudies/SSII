@@ -1,0 +1,11 @@
+# Archivos y carpetas compilados
+bin/
+
+# Archivos específicos del IDE (opcional, pero recomendado)
+# .vscode/ # Comentado para incluir settings.json y launch.json
+*.iml
+.idea/
+
+# Archivos de sistema operativo (opcional)
+.DS_Store
+Thumbs.db

@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/jade.jar",
+        "lib/commons-codec-1.33.jar"
+    ]
+}
+
