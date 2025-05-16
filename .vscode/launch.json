@@ -6,7 +6,7 @@
             "name": "Iniciar Metabuscador",
             "request": "launch",
             "mainClass": "jade.Boot",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/ProyectoJADE",
             "args": [
                 "-gui",
                 "-agents",
@@ -14,9 +14,9 @@
             ],
             "vmArgs": "-Dfile.encoding=UTF-8",
             "classPaths": [
-                "bin", 
-                "lib/jade.jar",
-                "lib/commons-codec-1.3.jar"
+                "${workspaceFolder}/ProyectoJADE/bin",
+                "${workspaceFolder}/ProyectoJADE/lib/jade.jar",
+                "${workspaceFolder}/ProyectoJADE/lib/commons-codec-1.3.jar"
             ],
             "console": "integratedTerminal"
         }

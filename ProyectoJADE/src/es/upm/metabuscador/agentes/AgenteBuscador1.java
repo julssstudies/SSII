@@ -3,7 +3,6 @@ package es.upm.metabuscador.agentes;
 import es.upm.metabuscador.comportamientos.ComportamientoBusqueda;
 import es.upm.metabuscador.comportamientos.ComportamientoRegistroBuscador;
 import es.upm.metabuscador.utils.Utils;
-
 import jade.core.Agent;
 
 /**

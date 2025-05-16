@@ -1,8 +1,0 @@
-{
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar"
-    ],
-    "java.project.sourcePaths": ["src"],
-    "java.project.outputPath": "bin",
-    "java.jdt.ls.vmargs": "-noverify" // Útil para JADE
-}
