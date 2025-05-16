@@ -11,7 +11,7 @@ import jade.core.Agent;
  */
 public class AgenteBuscador1 extends Agent {
     private static final long serialVersionUID = 1L;
-    
+    //Julie estuvo aqui
     // Constante para el tipo de servicio buscador
     private static final String TIPO_SERVICIO_BUSCADOR = "buscador";
     
