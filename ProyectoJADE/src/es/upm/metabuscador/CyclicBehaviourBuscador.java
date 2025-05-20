@@ -69,18 +69,12 @@ public class CyclicBehaviourBuscador extends CyclicBehaviour {
 //Creamos un hilo independiente
 			ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 //Creamos un comportamiento ComportamientoMUIA
-			OneShotBehaviour b1 = new ComportamientoMUIA();
+			OneShotBehaviour b1 = new ComportamientoBing();
 //Metemos el comportamiento en un hilo independiente como un subcomportamiento del comportamiento paralelo
 			paralelo.addSubBehaviour(tbf.wrap(b1));
 			ThreadedBehaviourFactory tbf2 = new ThreadedBehaviourFactory();
-			OneShotBehaviour b2 = new ComportamientoUPM();
+			OneShotBehaviour b2 = new ComportamientoGoogle();
 			paralelo.addSubBehaviour(tbf2.wrap(b2));
-			ThreadedBehaviourFactory tbf3 = new ThreadedBehaviourFactory();
-			OneShotBehaviour b3 = new ComportamientoElMundo();
-			paralelo.addSubBehaviour(tbf3.wrap(b3));
-			ThreadedBehaviourFactory tbf4 = new ThreadedBehaviourFactory();
-			OneShotBehaviour b4 = new ComportamientoElPais();
-			paralelo.addSubBehaviour(tbf4.wrap(b4));
 //Añadimos el comportamiento paralelo al agente
 			myAgent.addBehaviour(paralelo);
 		} // if
@@ -90,30 +84,8 @@ public class CyclicBehaviourBuscador extends CyclicBehaviour {
 		}
 	} // action
 
-	public class ComportamientoMUIA extends OneShotBehaviour {
-		String sitio = "https://muia.dia.fi.upm.es/es/";
-		List<String> respuesta1 = new ArrayList<String>();
-
-		public void action() {
-			respuesta1 = buscarCadena(sitio);
-			if (respuesta1.size() > 0)
-				respuesta.addAll(respuesta1);
-		}
-	}
-
-	public class ComportamientoUPM extends OneShotBehaviour {
-		String sitio = "https://www.upm.es/";
-		List<String> respuesta2 = new ArrayList<String>();
-
-		public void action() {
-			respuesta2 = buscarCadena(sitio);
-			if (respuesta2.size() > 0)
-				respuesta.addAll(respuesta2);
-		}
-	}
-
-	public class ComportamientoElMundo extends OneShotBehaviour {
-		String sitio = "https://www.elmundo.es/";
+	public class ComportamientoBing extends OneShotBehaviour {
+		String sitio = "https://www.bing.com/";
 		List<String> respuesta3 = new ArrayList<String>();
 
 		public void action() {
@@ -123,8 +95,8 @@ public class CyclicBehaviourBuscador extends CyclicBehaviour {
 		}
 	}
 
-	public class ComportamientoElPais extends OneShotBehaviour {
-		String sitio = "https://www.elpais.es/";
+	public class ComportamientoGoogle extends OneShotBehaviour {
+		String sitio = "https://www.google.com/";
 		List<String> respuesta4 = new ArrayList<String>();
 
 		public void action() {
@@ -139,7 +111,8 @@ public class CyclicBehaviourBuscador extends CyclicBehaviour {
 		String temp;
 		List<String> respuestaBuscar = new ArrayList();
 		try {
-			URL url = new URL(sitio);
+			
+			URL url = new URL(sitio + "search?q=" + cadenaBuscar.replaceAll("\\s+", "+"));
 			scanner = new Scanner(url.openStream());
 			while (true) {
 //a la izquierda tienes > o <\ y a la derecha > o <\

@@ -1,7 +1,7 @@
 package es.upm.metabuscador;
 
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -12,107 +12,91 @@ import java.util.List;
 
 public class AgenteCliente extends Agent {
 
-    private JFrame frame;
-    private JTextField searchField;
-    private JButton searchButton;
-    private JTextArea resultArea;
+	private JFrame frame;
+	private JTextField searchField;
+	private JButton searchButton;
+	private JTextArea resultArea;
 
-    public void setup() {
-        System.out.println("Soy el agente Cliente");
+	public void setup() {
+		System.out.println("Soy el agente Cliente");
+		SwingUtilities.invokeLater(this::createGUI);
+	}
 
-        // Interfaz en el hilo de Swing
-        SwingUtilities.invokeLater(() -> createGUI());
+	private void createGUI() {
+		frame = new JFrame("MetaBuscador");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(600, 500);
+		frame.setLayout(new BorderLayout(20, 20));
 
-        // Comportamiento cíclico de escucha de respuestas
-        addBehaviour(new ComportamientoUsuario());
-    }
+		JPanel topPanel = new JPanel(new BorderLayout(10, 10));
+		topPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 10, 40));
 
-    private void createGUI() {
-        frame = new JFrame("MetaBuscador");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 500);
-        frame.setLayout(new BorderLayout(20, 20));
+		searchField = new JTextField();
+		searchField.setFont(new Font("SansSerif", Font.PLAIN, 18));
+		topPanel.add(searchField, BorderLayout.CENTER);
 
-        // Panel superior: como Google, centrado
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BorderLayout(10, 10));
-        topPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 10, 40));
+		searchButton = new JButton("Buscar");
+		searchButton.setFont(new Font("SansSerif", Font.BOLD, 16));
+		topPanel.add(searchButton, BorderLayout.EAST);
 
-        searchField = new JTextField();
-        searchField.setFont(new Font("SansSerif", Font.PLAIN, 18));
-        topPanel.add(searchField, BorderLayout.CENTER);
+		frame.add(topPanel, BorderLayout.NORTH);
 
-        searchButton = new JButton("Buscar");
-        searchButton.setFont(new Font("SansSerif", Font.BOLD, 16));
-        topPanel.add(searchButton, BorderLayout.EAST);
+		resultArea = new JTextArea();
+		resultArea.setEditable(false);
+		resultArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+		JScrollPane scrollPane = new JScrollPane(resultArea);
+		scrollPane.setBorder(BorderFactory.createTitledBorder("Resultados"));
 
-        frame.add(topPanel, BorderLayout.NORTH);
+		frame.add(scrollPane, BorderLayout.CENTER);
 
-        // Panel central: resultados
-        resultArea = new JTextArea();
-        resultArea.setEditable(false);
-        resultArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        JScrollPane scrollPane = new JScrollPane(resultArea);
-        scrollPane.setBorder(BorderFactory.createTitledBorder("Resultados"));
+		searchButton.addActionListener(e -> {
+			String query = searchField.getText();
+			if (!query.isEmpty()) {
+				resultArea.setText("Buscando: " + query + "...\n");
+				addBehaviour(new BuscarYMostrar(query));
+			}
+		});
 
-        frame.add(scrollPane, BorderLayout.CENTER);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+	}
 
-        // Acción del botón
-        searchButton.addActionListener(e -> {
-            String query = searchField.getText().trim();
-            System.out.println("Lo que escribió el usuario: " + query);
-            if (!query.isEmpty()) {
-                resultArea.setText("Buscando...\n");
-                // Enviar mensaje desde nuevo hilo (para no bloquear la interfaz)
-                new Thread(() -> {
-                    Utils.enviarMensaje(this, "buscar", query);
-                }).start();
-            }
-        });
+	// Comportamiento que ejecuta la búsqueda de forma secuencial
+	class BuscarYMostrar extends OneShotBehaviour {
+		private final String consulta;
 
-        frame.setLocationRelativeTo(null); // Centrar
-        frame.setVisible(true);
-    }
+		public BuscarYMostrar(String consulta) {
+			this.consulta = consulta;
+		}
 
-    // Comportamiento para recibir respuestas
-    class ComportamientoUsuario extends CyclicBehaviour {
-        public void action() {
-        	
-        	ACLMessage msg = blockingReceive(MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-        	if (msg != null) {
-        	    SwingUtilities.invokeLater(() -> {
-        	        resultArea.setText(""); // Limpiar
-        	    });
-        	    try {
-        	        // INTENTA LEER COMO OBJETO
-        	        Object content = msg.getContentObject();
+		public void action() {
+			try {
+				// Enviar mensaje al agente buscador
+				Utils.enviarMensaje(myAgent, "buscar", consulta);
 
-        	        if (content instanceof List) {
-        	            List<String> mensajes = (List<String>) content;
-        	            SwingUtilities.invokeLater(() -> {
-        	                for (String m : mensajes) {
-        	                    resultArea.append("• " + m.toString() + "\n");
-        	                }
-        	                resultArea.setText("...\n");
-        	            });
-        	        } else {
-        	            // No es lista, mostrar genéricamente
-        	            SwingUtilities.invokeLater(() -> {
-        	                resultArea.append("Respuesta no reconocida del agente.");
-        	            });
-        	        }
-        	    } catch (UnreadableException | ClassCastException e) {
-        	        // Fallback: intentamos leer como texto
-        	        try {
-        	            String contenido = msg.getContent();
-        	            SwingUtilities.invokeLater(() -> {
-        	                resultArea.append(contenido + "\n");
-        	            });
-        	        } catch (Exception ex) {
-        	            ex.printStackTrace();
-        	        }
-        	    }
-        	}
-        }
-    }
+				// Esperar bloqueantemente respuesta
+				ACLMessage msg = blockingReceive(MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+
+				if (msg != null) {
+					Object content = msg.getContentObject();
+
+					if (content instanceof List) {
+						List<String> resultados = (List<String>) content;
+						SwingUtilities.invokeLater(() -> {
+							resultArea.setText("");
+							if (resultados.isEmpty()) {
+								resultArea.append("No se encontraron resultados.\n");
+							} else {
+								for (String resultado : resultados) {
+									resultArea.append("• " + resultado + "\n");
+								}
+							}
+						});
+					}
+				}
+			} catch (UnreadableException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }
