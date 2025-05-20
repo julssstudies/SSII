@@ -3,34 +3,33 @@ package es.upm.metabuscador.agentes;
 import es.upm.metabuscador.comportamientos.ComportamientoBusqueda;
 import es.upm.metabuscador.comportamientos.ComportamientoRegistroBuscador;
 import es.upm.metabuscador.utils.Utils;
-
 import jade.core.Agent;
 
 /**
  * Agente buscador que simula búsquedas en una fuente de datos específica.
- * Este agente busca en una base de datos de libros y publicaciones académicas.
+ * Este agente busca en una base de datos de noticias tecnológicas.
  */
-public class AgenteBuscador2 extends Agent {
+public class AgenteBuscador extends Agent {
     private static final long serialVersionUID = 1L;
-    
+    //Julie estuvo aqui
     // Constante para el tipo de servicio buscador
     private static final String TIPO_SERVICIO_BUSCADOR = "buscador";
     
     // Nombre de la fuente de datos
-    private static final String NOMBRE_FUENTE = "Biblioteca Digital";
+    private static final String NOMBRE_FUENTE = "Noticias Tecnológicas";
     
-    // Base de datos simulada con algunos libros y publicaciones
+    // Base de datos simulada con algunos artículos tecnológicos
     private static final String[] BASE_DATOS = {
-        "Inteligencia Artificial: Un Enfoque Moderno (Russell & Norvig)",
-        "Aprendizaje Automático: Una Introducción Práctica (Mitchell)",
-        "Fundamentos de Sistemas Multiagente con JADE (Bellifemine et al.)",
-        "Distributed Artificial Intelligence: Agent Technology and Applications (Sugawara)",
-        "Comunicación entre Agentes: Protocolos y Ontologías",
-        "Programación Orientada a Agentes: Teoría y Práctica",
-        "Razonamiento en Sistemas Multiagente",
-        "Algoritmos Genéticos y Computación Evolutiva",
-        "La Web Semántica y los Sistemas Multiagente",
-        "Agentes Conversacionales: Diseño e Implementación"
+        "Nuevos avances en inteligencia artificial permiten detectar enfermedades con mayor precisión",
+        "La realidad virtual revoluciona la forma de entrenar a profesionales médicos",
+        "Investigadores desarrollan un nuevo algoritmo capaz de predecir tendencias del mercado",
+        "El machine learning mejora la eficiencia en la producción industrial",
+        "Grandes empresas tecnológicas invierten en el desarrollo de energías renovables",
+        "Nueva generación de robots asistenciales para el cuidado de personas mayores",
+        "La computación cuántica promete revolucionar la criptografía actual",
+        "Dispositivos inteligentes que permiten monitorizar la salud en tiempo real",
+        "El internet de las cosas mejora la gestión de ciudades inteligentes",
+        "Avances en el desarrollo de coches autónomos reducen los accidentes de tráfico"
     };
     
     @Override
