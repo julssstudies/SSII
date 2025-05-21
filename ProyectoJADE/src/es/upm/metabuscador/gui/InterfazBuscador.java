@@ -9,6 +9,10 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -17,8 +21,7 @@ import java.util.List;
  */
 public class InterfazBuscador extends JFrame {
     private static final long serialVersionUID = 1L;
-    
-    private AgenteInterfaz agente;
+      private AgenteInterfaz agente;
     private JTextField txtBusqueda;
     private JTextArea txtResultados;
     private JButton btnBuscar;
@@ -49,22 +52,34 @@ public class InterfazBuscador extends JFrame {
         panelPrincipal = new JPanel();
         panelPrincipal.setLayout(new BorderLayout(10, 10));
         panelPrincipal.setBorder(new EmptyBorder(10, 10, 10, 10));
-        
-        // Panel superior (búsqueda)
+          // Panel superior (búsqueda)
         JPanel panelBusqueda = new JPanel(new BorderLayout(5, 0));
         JLabel lblBusqueda = new JLabel("Término de búsqueda:");
         txtBusqueda = new JTextField(20);
         btnBuscar = new JButton("Buscar");
         
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        panelBotones.add(btnBuscar);
+        
+        JButton btnAbrirUrl = new JButton("Abrir URL");
+        btnAbrirUrl.setToolTipText("Abrir URL seleccionada en el navegador");
+        btnAbrirUrl.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                abrirUrlSeleccionada();
+            }
+        });
+        panelBotones.add(btnAbrirUrl);
+        
         panelBusqueda.add(lblBusqueda, BorderLayout.WEST);
         panelBusqueda.add(txtBusqueda, BorderLayout.CENTER);
-        panelBusqueda.add(btnBuscar, BorderLayout.EAST);
-        
-        // Panel de resultados
+        panelBusqueda.add(panelBotones, BorderLayout.EAST);// Panel de resultados usando JTextArea con manejo de URLs
         txtResultados = new JTextArea();
         txtResultados.setEditable(false);
         txtResultados.setLineWrap(true);
         txtResultados.setWrapStyleWord(true);
+        txtResultados.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        
         JScrollPane scrollPane = new JScrollPane(txtResultados);
         
         // Panel de estado
@@ -95,9 +110,7 @@ public class InterfazBuscador extends JFrame {
                 realizarBusqueda();
             }
         });
-    }
-    
-    /**
+    }    /**
      * Realiza una búsqueda con el término ingresado.
      */
     private void realizarBusqueda() {
@@ -113,14 +126,11 @@ public class InterfazBuscador extends JFrame {
                 "Campo vacío", 
                 JOptionPane.WARNING_MESSAGE);
         }
-    }
-    
-    /**
+    }    /**
      * Muestra los resultados de la búsqueda en la interfaz.
      * 
      * @param resultados Lista de resultados de búsqueda
-     */
-    public void mostrarResultados(List<ResultadoBusqueda> resultados) {
+     */    public void mostrarResultados(List<ResultadoBusqueda> resultados) {
         // Limpiar área de resultados
         txtResultados.setText("");
         
@@ -132,10 +142,79 @@ public class InterfazBuscador extends JFrame {
             txtResultados.append("Título: " + resultado.getTitulo() + "\n");
             txtResultados.append("Fuente: " + resultado.getFuente() + "\n");
             txtResultados.append("Descripción: " + resultado.getDescripcion() + "\n");
+            
+            // Si hay URLs en la descripción, extraer y mostrar mensaje informativo
+            if (resultado.getDescripcion().contains("URL:")) {
+                String[] lineas = resultado.getDescripcion().split("\n");
+                for (String linea : lineas) {
+                    if (linea.trim().startsWith("URL:")) {
+                        String url = linea.substring(linea.indexOf(":") + 1).trim();
+                        txtResultados.append("\n* URL para abrir en navegador: " + url + "\n");
+                        txtResultados.append("  (Selecciona esta URL y haz clic en el botón 'Abrir URL')\n");
+                    }
+                }
+            }
+            
             txtResultados.append("----------------------------------------\n");
         }
         
         // Actualizar estado
         lblEstado.setText("Búsqueda completada. " + resultados.size() + " resultados encontrados.");
+        
+        // Hacer que el texto vuelva al inicio
+        txtResultados.setCaretPosition(0);
+    }
+    
+    /**
+     * Método para abrir una URL seleccionada en el área de resultados
+     */
+    private void abrirUrlSeleccionada() {
+        String seleccionado = txtResultados.getSelectedText();
+        
+        if (seleccionado != null && !seleccionado.trim().isEmpty()) {
+            // Intentar extraer una URL válida de la selección
+            String urlPosible = seleccionado.trim();
+            
+            // Asegurarse de que comienza con http:// o https://
+            if (urlPosible.startsWith("http://") || urlPosible.startsWith("https://")) {
+                abrirUrl(urlPosible);
+            } else if (urlPosible.startsWith("www.")) {
+                abrirUrl("http://" + urlPosible);
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "No se ha detectado una URL válida en el texto seleccionado.\n" +
+                    "Por favor, seleccione una URL que empiece con http://, https:// o www.", 
+                    "URL no válida", 
+                    JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "Por favor, seleccione primero una URL en los resultados", 
+                "Selección vacía", 
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
+    /**
+     * Método para abrir una URL en el navegador predeterminado
+     */
+    private void abrirUrl(String url) {
+        try {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI(url));
+                lblEstado.setText("Abriendo URL en navegador: " + url);
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Su sistema no soporta la apertura automática de URLs.\n" +
+                    "Por favor, copie y pegue la URL en su navegador: " + url, 
+                    "No se puede abrir URL", 
+                    JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (IOException | URISyntaxException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error al abrir la URL: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

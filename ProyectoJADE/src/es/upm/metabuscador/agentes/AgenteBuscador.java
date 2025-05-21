@@ -6,31 +6,16 @@ import es.upm.metabuscador.utils.Utils;
 import jade.core.Agent;
 
 /**
- * Agente buscador que simula búsquedas en una fuente de datos específica.
- * Este agente busca en una base de datos de noticias tecnológicas.
+ * Agente buscador que realiza búsquedas utilizando la API de SerpStack.
  */
 public class AgenteBuscador extends Agent {
     private static final long serialVersionUID = 1L;
-    //Julie estuvo aqui
+    
     // Constante para el tipo de servicio buscador
     private static final String TIPO_SERVICIO_BUSCADOR = "buscador";
     
     // Nombre de la fuente de datos
-    private static final String NOMBRE_FUENTE = "Noticias Tecnológicas";
-    
-    // Base de datos simulada con algunos artículos tecnológicos
-    private static final String[] BASE_DATOS = {
-        "Nuevos avances en inteligencia artificial permiten detectar enfermedades con mayor precisión",
-        "La realidad virtual revoluciona la forma de entrenar a profesionales médicos",
-        "Investigadores desarrollan un nuevo algoritmo capaz de predecir tendencias del mercado",
-        "El machine learning mejora la eficiencia en la producción industrial",
-        "Grandes empresas tecnológicas invierten en el desarrollo de energías renovables",
-        "Nueva generación de robots asistenciales para el cuidado de personas mayores",
-        "La computación cuántica promete revolucionar la criptografía actual",
-        "Dispositivos inteligentes que permiten monitorizar la salud en tiempo real",
-        "El internet de las cosas mejora la gestión de ciudades inteligentes",
-        "Avances en el desarrollo de coches autónomos reducen los accidentes de tráfico"
-    };
+    private static final String NOMBRE_FUENTE = "SerpStack"; // Actualizado
     
     @Override
     protected void setup() {
@@ -40,7 +25,7 @@ public class AgenteBuscador extends Agent {
         addBehaviour(new ComportamientoRegistroBuscador(this, TIPO_SERVICIO_BUSCADOR, NOMBRE_FUENTE));
         
         // Añadir el comportamiento para buscar
-        addBehaviour(new ComportamientoBusqueda(this, NOMBRE_FUENTE, BASE_DATOS));
+        addBehaviour(new ComportamientoBusqueda(this, NOMBRE_FUENTE)); 
     }
     
     @Override

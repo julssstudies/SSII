@@ -25,8 +25,7 @@ public class Utils {
      * @param agent El agente que realiza la búsqueda
      * @param tipo El tipo de servicio buscado
      * @return Array con las descripciones de los agentes encontrados
-     */
-    public static DFAgentDescription[] buscarAgentes(Agent agent, String tipo) {
+     */    public static DFAgentDescription[] buscarAgentes(Agent agent, String tipo) {
         // Creo el template para buscar servicios de un tipo específico
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
@@ -34,9 +33,26 @@ public class Utils {
         template.addServices(sd);
         
         try {
-            DFAgentDescription[] result = DFService.search(agent, template);
+            // Configurar un tiempo de espera más largo (10 segundos)
+            // Usar SearchConstraints para evitar timeout
+            jade.domain.FIPAAgentManagement.SearchConstraints sc = new jade.domain.FIPAAgentManagement.SearchConstraints();
+            sc.setMaxResults(Long.valueOf(20)); // Aumentar máximo de resultados
+            sc.setMaxDepth(Long.valueOf(3));    // Aumentar profundidad de búsqueda
+            
+            DFAgentDescription[] result = DFService.search(agent, template, sc);
+            
+            if (result != null && result.length > 0) {
+                System.out.println("Utils: Encontrados " + result.length + " agentes de tipo '" + tipo + "'");
+                for (DFAgentDescription agente : result) {
+                    System.out.println("  - " + agente.getName().getLocalName());
+                }
+            } else {
+                System.out.println("Utils: No se encontraron agentes de tipo '" + tipo + "'");
+            }
+            
             return result;
         } catch (FIPAException e) {
+            System.err.println("Utils: Error buscando agentes de tipo '" + tipo + "': " + e.getMessage());
             e.printStackTrace();
         }
         
