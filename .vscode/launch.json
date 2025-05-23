@@ -9,7 +9,7 @@
             "cwd": "${workspaceFolder}/ProyectoJADE",            "args": [
                 "-gui",
                 "-agents",
-                "agenteInterfaz:es.upm.metabuscador.agentes.AgenteInterfaz;agenteCoordinador:es.upm.metabuscador.agentes.AgenteCoordinador;agenteSerpStack:es.upm.metabuscador.agentes.AgenteBuscador"
+                "agenteInterfaz:es.upm.metabuscador.agentes.AgenteInterfaz;agenteCoordinador:es.upm.metabuscador.agentes.AgenteCoordinador;agenteSerpStack:es.upm.metabuscador.agentes.AgenteBuscador;agenteNewsAPI:es.upm.metabuscador.agentes.AgenteBuscadorNewsAPI"
             ],
             "vmArgs": "-Dfile.encoding=UTF-8",            "classPaths": [
                 "${workspaceFolder}/ProyectoJADE/bin",
