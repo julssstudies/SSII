@@ -225,7 +225,11 @@ public class ComportamientoBusqueda extends CyclicBehaviour {
                                 String displayedUrl = question.optString("displayed_url", "");
                                 
                                 // Limpiar texto repetido en la pregunta (si aplica)
-                                questionText = questionText.split("\\\\")[0] + "?";
+                                int firstQuestionMarkIndex = questionText.indexOf('?');
+                                if (firstQuestionMarkIndex != -1) {
+                                    questionText = questionText.substring(0, firstQuestionMarkIndex + 1);
+                                }
+                                // Si no hay '?', se usa questionText tal cual (podría ser "Sin pregunta" o algo inesperado)
                                 System.out.println("Processed questionText: " + questionText); // DEBUG
                                 
                                 // Crear una URL de búsqueda de Google para la pregunta
