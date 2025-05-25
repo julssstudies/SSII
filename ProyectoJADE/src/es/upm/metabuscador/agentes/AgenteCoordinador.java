@@ -13,7 +13,7 @@ import jade.core.Agent;
 public class AgenteCoordinador extends Agent {
     private static final long serialVersionUID = 1L;
     
-    // Constante para el tipo de servicio coordinador
+    // Tipo de servicio que ofrece este agente coordinador
     private static final String TIPO_SERVICIO_COORDINADOR = "coordinador";
     
     @Override
@@ -30,7 +30,7 @@ public class AgenteCoordinador extends Agent {
     @Override
     protected void takeDown() {
         try {
-            // Desregistrar del DF
+            // Desregistrar el servicio del DF al terminar
             Utils.desregistrarServicio(this);
         } catch (Exception e) {
             System.err.println("Error al desregistrar el agente: " + e.getMessage());

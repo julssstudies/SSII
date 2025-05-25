@@ -5,6 +5,7 @@ import es.upm.metabuscador.modelo.ParametrosBusqueda;
 import es.upm.metabuscador.modelo.ResultadoBusqueda;
 import es.upm.metabuscador.utils.Utils;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -26,31 +27,21 @@ public class AgenteInterfaz extends Agent {
     
     // Constante para el tipo de servicio coordinador
     private static final String TIPO_SERVICIO_COORDINADOR = "coordinador";
-      private InterfazBuscador gui;
+    
+    private InterfazBuscador gui;
     
     @Override
     protected void setup() {
         System.out.println("Agente " + getLocalName() + " iniciado");
         
-        try {
-            // Crear e inicializar la interfaz gráfica con soporte para EDT de Swing
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        gui = new InterfazBuscador(AgenteInterfaz.this);
-                        gui.setVisible(true);
-                        System.out.println("Interfaz gráfica iniciada correctamente");
-                    } catch (Exception e) {
-                        System.err.println("Error al iniciar la interfaz gráfica: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } catch (Exception e) {
-            System.err.println("Error crítico al iniciar la interfaz gráfica: " + e.getMessage());
-            e.printStackTrace();
-        }
+        // Crear e inicializar la interfaz gráfica
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                gui = new InterfazBuscador(AgenteInterfaz.this);
+                gui.setVisible(true);
+            }
+        });
         
         // Añadir comportamiento para recibir resultados de búsqueda
         addBehaviour(new ComportamientoRecepcionResultados());
@@ -70,66 +61,42 @@ public class AgenteInterfaz extends Agent {
     /**
      * Método para iniciar una búsqueda.
      * Llamado desde la interfaz gráfica.
-     *     * @param parametros Parámetros de la búsqueda
+     * 
+     * @param parametros Parámetros de la búsqueda
      */
     public void realizarBusqueda(ParametrosBusqueda parametros) {
         System.out.println("Iniciando búsqueda: " + parametros.getTerminoBusqueda());
         
-        try {
-            // Buscar el agente coordinador
-            DFAgentDescription coordinador = Utils.buscarAgente(this, TIPO_SERVICIO_COORDINADOR);
-            
-            if (coordinador != null) {
-                try {
-                    // Crear mensaje para el coordinador
-                    ACLMessage mensaje = new ACLMessage(ACLMessage.REQUEST);
-                    mensaje.addReceiver(coordinador.getName());
-                    mensaje.setContentObject(parametros);
-                    
-                    // Enviar la solicitud
-                    send(mensaje);
-                    
-                    System.out.println("Solicitud de búsqueda enviada al coordinador: " + 
-                            coordinador.getName().getLocalName());
-                    
-                    // Esperar un momento para que se procese el mensaje antes de comprobar resultados
-                    try {
-                        Thread.sleep(500); // Esperar 500ms
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                    }
-                    
-                } catch (IOException e) {
-                    System.err.println("Error al enviar solicitud de búsqueda: " + e.getMessage());
-                    mostrarErrorEnInterfaz("Error al enviar la solicitud: " + e.getMessage());
-                }
-            } else {
-                System.err.println("No se encontró un agente coordinador");
-                mostrarErrorEnInterfaz("No se encontró un agente coordinador. Compruebe que todos los agentes están en ejecución.");
+        // Buscar el agente coordinador
+        DFAgentDescription coordinador = Utils.buscarAgente(this, TIPO_SERVICIO_COORDINADOR);
+        
+        if (coordinador != null) {
+            try {
+                // Crear mensaje para el coordinador
+                ACLMessage mensaje = new ACLMessage(ACLMessage.REQUEST);
+                mensaje.addReceiver(coordinador.getName());
+                mensaje.setContentObject(parametros);
+                
+                // Enviar la solicitud
+                send(mensaje);
+                
+                System.out.println("Solicitud de búsqueda enviada al coordinador: " + 
+                        coordinador.getName().getLocalName());
+            } catch (IOException e) {
+                System.err.println("Error al enviar solicitud de búsqueda: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error inesperado en realizarBusqueda: " + e.getMessage());
-            e.printStackTrace();
-            mostrarErrorEnInterfaz("Error inesperado: " + e.getMessage());
-        }    }
-    
-    /**
-     * Método auxiliar para mostrar errores en la interfaz
-     */
-    private void mostrarErrorEnInterfaz(final String mensajeError) {
-        if (gui != null) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    List<ResultadoBusqueda> listaError = new ArrayList<>();
-                    listaError.add(new ResultadoBusqueda(
-                        "Error en la búsqueda", 
-                        mensajeError + "\n\nCompruebe la consola para más detalles.", 
-                        "Sistema"
-                    ));
-                    gui.mostrarResultados(listaError);
-                }
-            });
+        } else {
+            System.err.println("No se encontró un agente coordinador");
+            // Mostrar mensaje de error en la interfaz
+            if (gui != null) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<ResultadoBusqueda> listaVacia = new ArrayList<>();
+                        gui.mostrarResultados(listaVacia);
+                    }
+                });
+            }
         }
     }
     
@@ -145,8 +112,7 @@ public class AgenteInterfaz extends Agent {
             MessageTemplate template = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
             ACLMessage mensaje = myAgent.receive(template);
             
-            if (mensaje != null) {
-                try {
+            if (mensaje != null) {                try {
                     Object contenido = mensaje.getContentObject();
                     
                     if (contenido instanceof ResultadoBusqueda[]) {
@@ -167,15 +133,9 @@ public class AgenteInterfaz extends Agent {
                                 }
                             });
                         }
-                    } else {
-                        System.err.println("Contenido recibido no es de tipo ResultadoBusqueda[]: " + 
-                            (contenido != null ? contenido.getClass().getName() : "null"));
-                        mostrarErrorEnInterfaz("Formato de respuesta incorrecto");
                     }
                 } catch (UnreadableException e) {
                     System.err.println("Error al leer los resultados: " + e.getMessage());
-                    e.printStackTrace();
-                    mostrarErrorEnInterfaz("Error al procesar resultados: " + e.getMessage());
                 }
             } else {
                 block();

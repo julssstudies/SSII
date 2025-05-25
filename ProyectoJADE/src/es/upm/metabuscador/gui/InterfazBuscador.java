@@ -44,25 +44,48 @@ public class InterfazBuscador extends JFrame {
     private void inicializarComponentes() {
         // Configuración de la ventana
         setTitle("Metabuscador JADE");
-        setSize(600, 400);
+        setSize(800, 600); // Aumentamos un poco el tamaño por defecto
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        
+
+        // Colores y Fuentes
+        Color colorFondoPrincipal = new Color(240, 240, 245); // Un gris claro
+        Color colorPanelBusqueda = new Color(220, 220, 225);
+        Color colorBoton = new Color(70, 130, 180); // Azul acero
+        Color colorTextoBoton = Color.WHITE;
+        Font fuenteEtiquetas = new Font("Arial", Font.BOLD, 14);
+        Font fuenteTexto = new Font("Arial", Font.PLAIN, 12);
+        Font fuenteResultados = new Font("Verdana", Font.PLAIN, 12);
+
         // Panel principal
         panelPrincipal = new JPanel();
         panelPrincipal.setLayout(new BorderLayout(10, 10));
-        panelPrincipal.setBorder(new EmptyBorder(10, 10, 10, 10));
-          // Panel superior (búsqueda)
-        JPanel panelBusqueda = new JPanel(new BorderLayout(5, 0));
+        panelPrincipal.setBorder(new EmptyBorder(15, 15, 15, 15)); // Más relleno
+        panelPrincipal.setBackground(colorFondoPrincipal);
+
+        // Panel superior (búsqueda)
+        JPanel panelBusqueda = new JPanel(new BorderLayout(10, 0)); // Aumentamos espacio horizontal
+        panelBusqueda.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panelBusqueda.setBackground(colorPanelBusqueda);
+
         JLabel lblBusqueda = new JLabel("Término de búsqueda:");
-        txtBusqueda = new JTextField(20);
+        lblBusqueda.setFont(fuenteEtiquetas);
+        txtBusqueda = new JTextField(30); // Un poco más ancho
+        txtBusqueda.setFont(fuenteTexto);
         btnBuscar = new JButton("Buscar");
-        
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        btnBuscar.setFont(fuenteEtiquetas);
+        btnBuscar.setBackground(colorBoton);
+        btnBuscar.setForeground(colorTextoBoton);
+
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0)); // Aumentamos espacio horizontal
+        panelBotones.setOpaque(false); // Hacemos transparente para que tome el color del panelBusqueda
         panelBotones.add(btnBuscar);
-        
+
         JButton btnAbrirUrl = new JButton("Abrir URL");
         btnAbrirUrl.setToolTipText("Abrir URL seleccionada en el navegador");
+        btnAbrirUrl.setFont(fuenteEtiquetas);
+        btnAbrirUrl.setBackground(colorBoton);
+        btnAbrirUrl.setForeground(colorTextoBoton);
         btnAbrirUrl.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -70,31 +93,42 @@ public class InterfazBuscador extends JFrame {
             }
         });
         panelBotones.add(btnAbrirUrl);
-        
+
         panelBusqueda.add(lblBusqueda, BorderLayout.WEST);
         panelBusqueda.add(txtBusqueda, BorderLayout.CENTER);
-        panelBusqueda.add(panelBotones, BorderLayout.EAST);// Panel de resultados usando JTextArea con manejo de URLs
+        panelBusqueda.add(panelBotones, BorderLayout.EAST);
+
+        // Panel de resultados usando JTextArea con manejo de URLs
         txtResultados = new JTextArea();
         txtResultados.setEditable(false);
         txtResultados.setLineWrap(true);
         txtResultados.setWrapStyleWord(true);
-        txtResultados.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        
+        txtResultados.setFont(fuenteResultados); // Nueva fuente para resultados
+        txtResultados.setMargin(new Insets(5, 5, 5, 5)); // Margen interno
+
         JScrollPane scrollPane = new JScrollPane(txtResultados);
-        
+        scrollPane.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder("Resultados de la Búsqueda"),
+            new EmptyBorder(5,5,5,5)
+        ));
+
+
         // Panel de estado
         JPanel panelEstado = new JPanel(new BorderLayout());
+        panelEstado.setOpaque(false); // Hacemos transparente
         lblEstado = new JLabel("Listo para buscar");
+        lblEstado.setFont(new Font("Arial", Font.ITALIC, 12));
+        lblEstado.setBorder(new EmptyBorder(5,0,0,0)); // Espacio superior
         panelEstado.add(lblEstado, BorderLayout.WEST);
-        
+
         // Añadir componentes al panel principal
         panelPrincipal.add(panelBusqueda, BorderLayout.NORTH);
         panelPrincipal.add(scrollPane, BorderLayout.CENTER);
         panelPrincipal.add(panelEstado, BorderLayout.SOUTH);
-        
+
         // Añadir panel principal a la ventana
         add(panelPrincipal);
-        
+
         // Configurar eventos
         btnBuscar.addActionListener(new ActionListener() {
             @Override
@@ -102,7 +136,7 @@ public class InterfazBuscador extends JFrame {
                 realizarBusqueda();
             }
         });
-        
+
         // Permitir buscar con Enter
         txtBusqueda.addActionListener(new ActionListener() {
             @Override
@@ -110,7 +144,9 @@ public class InterfazBuscador extends JFrame {
                 realizarBusqueda();
             }
         });
-    }    /**
+    }
+    
+    /**
      * Realiza una búsqueda con el término ingresado.
      */
     private void realizarBusqueda() {
@@ -139,23 +175,37 @@ public class InterfazBuscador extends JFrame {
         
         // Mostrar cada resultado
         for (ResultadoBusqueda resultado : resultados) {
-            txtResultados.append("Título: " + resultado.getTitulo() + "\n");
-            txtResultados.append("Fuente: " + resultado.getFuente() + "\n");
-            txtResultados.append("Descripción: " + resultado.getDescripcion() + "\n");
+            txtResultados.append("TÍTULO: " + (resultado.getTitulo() != null ? resultado.getTitulo() : "N/A") + "\n");
+            txtResultados.append("FUENTE: " + (resultado.getFuente() != null ? resultado.getFuente() : "N/A") + "\n");
             
-            // Si hay URLs en la descripción, extraer y mostrar mensaje informativo
-            if (resultado.getDescripcion().contains("URL:")) {
-                String[] lineas = resultado.getDescripcion().split("\n");
-                for (String linea : lineas) {
-                    if (linea.trim().startsWith("URL:")) {
-                        String url = linea.substring(linea.indexOf(":") + 1).trim();
-                        txtResultados.append("\n* URL para abrir en navegador: " + url + "\n");
-                        txtResultados.append("  (Selecciona esta URL y haz clic en el botón 'Abrir URL')\n");
+            txtResultados.append("DESCRIPCIÓN:\n");
+            String descripcion = resultado.getDescripcion();
+            String urlParaAbrir = null; 
+
+            if (descripcion != null && !descripcion.isEmpty()) {
+                String[] lineasDesc = descripcion.split("\\n");
+                for (String lineaD : lineasDesc) {
+                    txtResultados.append("  " + lineaD + "\n"); // Indentamos cada línea de la descripción
+                    // Extraer la URL si la línea comienza con "URL:"
+                    if (lineaD.trim().startsWith("URL:")) { 
+                        urlParaAbrir = lineaD.substring(lineaD.indexOf(":") + 1).trim();
+                    }
+                    // También verificamos si la línea es una URL directa 
+                    // y si aún no hemos encontrado una URL con el prefijo "URL:"
+                    else if (urlParaAbrir == null && (lineaD.trim().startsWith("http://") || lineaD.trim().startsWith("https://"))) {
+                        urlParaAbrir = lineaD.trim();
                     }
                 }
+            } else {
+                txtResultados.append("  (Descripción no disponible)\n");
             }
-            
-            txtResultados.append("----------------------------------------\n");
+
+            // Añadimos el texto de ayuda para abrir la URL si se determinó alguna
+            if (urlParaAbrir != null && !urlParaAbrir.isEmpty()) {
+                txtResultados.append("\n  * URL para abrir en navegador: " + urlParaAbrir + "\n");
+                txtResultados.append("    (Selecciona esta URL y haz clic en el botón 'Abrir URL')\n");
+            }
+            txtResultados.append("----------------------------------------\n"); // Separador entre resultados
         }
         
         // Actualizar estado

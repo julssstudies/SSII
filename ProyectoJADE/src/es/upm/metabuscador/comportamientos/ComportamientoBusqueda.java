@@ -4,7 +4,7 @@ import es.upm.metabuscador.modelo.ParametrosBusqueda;
 import es.upm.metabuscador.modelo.ResultadoBusqueda;
 
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -26,11 +26,10 @@ import org.json.JSONObject;
 /**
  * Comportamiento para realizar búsquedas utilizando la API de SerpStack.
  */
-public class ComportamientoBusqueda extends Behaviour {
+public class ComportamientoBusqueda extends CyclicBehaviour {
     private static final long serialVersionUID = 1L;
     
     private String nombreFuente;
-    private boolean terminado = false;
     private static final String SERPSTACK_API_KEY = "c9c72f659c07d23349f0c34566b14114";
     private static final String SERPSTACK_API_URL = "http://api.serpstack.com/search";
 
@@ -47,10 +46,10 @@ public class ComportamientoBusqueda extends Behaviour {
     
     @Override
     public void action() {
-        // Crear un template para recibir solo mensajes de tipo REQUEST
+        // Crear una plantilla para recibir solo mensajes de tipo REQUEST
         MessageTemplate template = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
         
-        // Esperar la recepción de un mensaje que cumpla con el template
+        // Esperar la recepción de un mensaje que cumpla con la plantilla
         ACLMessage mensaje = myAgent.receive(template);
         
         if (mensaje != null) {
@@ -101,7 +100,7 @@ public class ComportamientoBusqueda extends Behaviour {
         System.out.println("Agente " + myAgent.getLocalName() + " (SerpStack) - Buscando: " + termino);
 
         try {
-            String encodedQuery = URLEncoder.encode(termino, "UTF-8");            // Creamos la URL correcta para SerpStack según la documentación
+            String encodedQuery = URLEncoder.encode(termino, "UTF-8");            // Creamos la URL correcta para SerpStack
             String urlString = SERPSTACK_API_URL + 
                 "?access_key=" + SERPSTACK_API_KEY + 
                 "&query=" + encodedQuery + 
@@ -111,8 +110,8 @@ public class ComportamientoBusqueda extends Behaviour {
             URL url = new URL(urlString);
             con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
-            con.setConnectTimeout(15000); // 15 segundos timeout conexión
-            con.setReadTimeout(20000);    // 20 segundos timeout lectura
+            con.setConnectTimeout(15000); // 15 segundos tiempo de espera para conexión
+            con.setReadTimeout(20000);    // 20 segundos tiempo de espera para lectura
 
             int status = con.getResponseCode();
             System.out.println("Agente " + myAgent.getLocalName() + " (SerpStack) - Status Code: " + status);
@@ -128,12 +127,12 @@ public class ComportamientoBusqueda extends Behaviour {
                   String responseContent = content.toString();
                 System.out.println("Agente " + myAgent.getLocalName() + " (SerpStack) - Respuesta recibida:");
                 System.out.println("----------- INICIO RESPUESTA API -----------");
-                System.out.println(responseContent);
+                System.out.println(responseContent); // Útil para depuración
                 System.out.println("------------ FIN RESPUESTA API ------------");
                 
                 JSONObject jsonResponse = new JSONObject(responseContent);
                 
-                // Verificar si hay un error explícito
+                // Verificar si hay un error explícito en la respuesta de la API
                 if (jsonResponse.has("error")) {
                     JSONObject errorObj = jsonResponse.getJSONObject("error");
                     String errorInfo = errorObj.optString("info", "Error desconocido de SerpStack");
@@ -149,12 +148,12 @@ public class ComportamientoBusqueda extends Behaviour {
                     System.out.println("Agente " + myAgent.getLocalName() + " (SerpStack) - Encontrados " + 
                         organicResults.length() + " resultados orgánicos");
                     
-                    // Limitar a 3 resultados
+                    // Limitar a un máximo de 3 resultados
                     int numResults = Math.min(organicResults.length(), 3);
                     
                     for (int i = 0; i < numResults; i++) {
                         JSONObject result = organicResults.getJSONObject(i);
-                          // Extraer solo los campos requeridos: posición, título y URL
+                          // Extraer campos relevantes: posición, título y URL
                         int position = result.optInt("position", i+1);
                         String titulo = result.optString("title", "Sin título");
                         String resultUrl = result.optString("url", "#");
@@ -182,7 +181,7 @@ public class ComportamientoBusqueda extends Behaviour {
                             System.out.println("Agente " + myAgent.getLocalName() + " (SerpStack) - Se encontraron resultados locales alternativos");
                             JSONArray localResults = jsonResponse.getJSONArray("local_results");
                             
-                            // Limitar a 3 resultados
+                            // Limitar a un máximo de 3 resultados locales
                             int numLocalResults = Math.min(localResults.length(), 3);
                             
                             for (int i = 0; i < numLocalResults; i++) {
@@ -193,7 +192,7 @@ public class ComportamientoBusqueda extends Behaviour {
                                 String rating = "Valoración: " + result.optString("rating", "N/A");
                                 String reviews = "Reseñas: " + result.optString("reviews", "0");
                                 String price = result.optString("price", "");
-                                  // Crear una descripción detallada
+                                  // Crear una descripción detallada para resultados locales
                                 StringBuilder descripcion = new StringBuilder();
                                 descripcion.append("Resultado local #").append(position).append("\n");
                                 if (!price.isEmpty()) {
@@ -224,8 +223,8 @@ public class ComportamientoBusqueda extends Behaviour {
                                 String questionText = question.optString("question", "Sin pregunta");
                                 String displayedUrl = question.optString("displayed_url", "");
                                 
-                                // Limpiar texto repetido en la pregunta
-                                questionText = questionText.split("\\?")[0] + "?";
+                                // Limpiar texto repetido en la pregunta (si aplica)
+                                questionText = questionText.split("\\\\?")[0] + "?";
                                 
                                 // Crear una URL de búsqueda de Google para la pregunta
                                 String searchUrl = "";
@@ -235,7 +234,7 @@ public class ComportamientoBusqueda extends Behaviour {
                                     searchUrl = "https://www.google.com";
                                 }
                                 
-                                // Crear una descripción detallada con URL
+                                // Crear una descripción detallada con la URL de búsqueda
                                 StringBuilder descripcion = new StringBuilder();
                                 descripcion.append(questionText).append("\n\n");
                                 descripcion.append("URL: ").append(searchUrl);
@@ -323,13 +322,7 @@ public class ComportamientoBusqueda extends Behaviour {
         
         if (resultados.isEmpty()) {
             System.out.println("Agente " + myAgent.getLocalName() + " (SerpStack) - No se obtuvieron resultados para: " + termino);
-            resultados.add(new ResultadoBusqueda("Sin resultados", "No se encontraron resultados para: " + termino, nombreFuente));
-        }
+            resultados.add(new ResultadoBusqueda("Sin resultados", "No se encontraron resultados para: " + termino, nombreFuente));        }
         return resultados;
-    }
-    
-    @Override
-    public boolean done() {
-        return terminado;
     }
 }

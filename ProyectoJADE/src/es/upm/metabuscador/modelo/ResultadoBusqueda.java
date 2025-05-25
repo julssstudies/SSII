@@ -26,8 +26,6 @@ public class ResultadoBusqueda implements Serializable {
         this.fuente = fuente;
     }
     
-    // Getters y setters
-    
     public String getTitulo() {
         return titulo;
     }

@@ -66,9 +66,13 @@ public class ComportamientoRecepcionBusqueda extends CyclicBehaviour {
                     
                     System.out.println("Agente " + myAgent.getLocalName() + 
                             " recibió solicitud para buscar: " + parametros.getTerminoBusqueda());
-                    
-                    // Buscar todos los agentes buscadores disponibles
+                      // Buscar todos los agentes buscadores disponibles
                     DFAgentDescription[] buscadores = Utils.buscarAgentes(myAgent, TIPO_SERVICIO_BUSCADOR);
+                    
+                    System.out.println("*** COORDINADOR *** Se encontraron " + buscadores.length + " agentes buscadores:");
+                    for (int i = 0; i < buscadores.length; i++) {
+                        System.out.println("  " + (i+1) + ". " + buscadores[i].getName().getLocalName());
+                    }
                     
                     if (buscadores.length > 0) {
                         // Almacenar información de la búsqueda en curso
@@ -78,15 +82,14 @@ public class ComportamientoRecepcionBusqueda extends CyclicBehaviour {
                                 parametros.getTerminoBusqueda()
                         );
                         busquedasEnCurso.put(mensajeSolicitud.getSender(), busqueda);
-                        
-                        // Distribuir la búsqueda a todos los buscadores
+                          // Distribuir la búsqueda a todos los buscadores
                         for (DFAgentDescription buscador : buscadores) {
                             ACLMessage solicitudBuscador = new ACLMessage(ACLMessage.REQUEST);
                             solicitudBuscador.addReceiver(buscador.getName());
                             solicitudBuscador.setContentObject(parametros);
                             myAgent.send(solicitudBuscador);
                             
-                            System.out.println("Enviando solicitud a: " + buscador.getName().getLocalName());
+                            System.out.println("*** COORDINADOR *** Enviando solicitud a: " + buscador.getName().getLocalName());
                         }
                     } else {
                         // Si no hay buscadores disponibles, enviar respuesta vacía

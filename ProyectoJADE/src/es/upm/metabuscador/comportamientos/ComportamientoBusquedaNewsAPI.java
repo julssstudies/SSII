@@ -4,7 +4,7 @@ import es.upm.metabuscador.modelo.ParametrosBusqueda;
 import es.upm.metabuscador.modelo.ResultadoBusqueda;
 
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -28,11 +28,10 @@ import org.json.JSONObject;
  * Comportamiento para realizar búsquedas utilizando la API de NewsAPI.ai (EventRegistry).
  * Busca noticias basadas en el término proporcionado por el usuario.
  */
-public class ComportamientoBusquedaNewsAPI extends Behaviour {
+public class ComportamientoBusquedaNewsAPI extends CyclicBehaviour {
     private static final long serialVersionUID = 1L;
     
     private String nombreFuente;
-    private boolean terminado = false;
     
     // Configuración de la API EventRegistry (anteriormente NewsAPI.ai)
     private static final String NEWSAPI_API_KEY = "3658dc14-0f61-45ae-bba9-20f8b2acc499";
@@ -123,13 +122,12 @@ public class ComportamientoBusquedaNewsAPI extends Behaviour {
             con.setReadTimeout(20000);     
 
             JSONObject requestBody = new JSONObject();
-            requestBody.put("keyword", termino); // Usar el término de búsqueda como keyword
+            requestBody.put("keyword", termino); // Usar el término de búsqueda como palabra clave
             requestBody.put("resultType", "articles"); 
             requestBody.put("articlesSortBy", "rel"); 
             requestBody.put("articlesCount", 3); 
             requestBody.put("apiKey", NEWSAPI_API_KEY);
-            // requestBody.put("lang", "spa"); // Opcional: para buscar en un idioma específico
-            // requestBody.put("infoArticleBodyLen", -1); // Opcional para obtener el cuerpo completo
+            
             
             System.out.println("Agente " + myAgent.getLocalName() + " (" + nombreFuente + ") - Enviando petición a: " + NEWSAPI_API_URL);
             System.out.println("Agente " + myAgent.getLocalName() + " (" + nombreFuente + ") - Cuerpo de la petición: " + requestBody.toString());
@@ -153,9 +151,9 @@ public class ComportamientoBusquedaNewsAPI extends Behaviour {
 
                 String responseContent = content.toString();
                 System.out.println("Agente " + myAgent.getLocalName() + " (" + nombreFuente + ") - Respuesta recibida:");
-                // System.out.println("----------- INICIO RESPUESTA API -----------");
-                // System.out.println(responseContent); // Descomentar para depuración detallada
-                // System.out.println("------------ FIN RESPUESTA API ------------");
+                // System.out.println("----------- INICIO RESPUESTA API -----------\");
+                // System.out.println(responseContent); // Descomentar para depuración detallada de la respuesta
+                // System.out.println("------------ FIN RESPUESTA API ------------\");
                 JSONObject jsonResponse = new JSONObject(responseContent);
                 
                 if (jsonResponse.has("error")) {
@@ -221,7 +219,7 @@ public class ComportamientoBusquedaNewsAPI extends Behaviour {
                             errContent.append(errLine);
                         }
                         errorBody = errContent.toString();
-                    } catch (IOException e_stream) { // Renombrar para evitar conflicto
+                    } catch (IOException e_stream) { // Renombrar variable para evitar conflicto de nombres
                         System.err.println("Agente " + myAgent.getLocalName() + " (" + nombreFuente + ") - Error al leer error stream: " + e_stream.getMessage());
                     }
                 }
@@ -233,7 +231,7 @@ public class ComportamientoBusquedaNewsAPI extends Behaviour {
             System.err.println("Agente " + myAgent.getLocalName() + " (" + nombreFuente + ") - Error de E/S al llamar a la API: " + e_io.getMessage());
             resultados.add(new ResultadoBusqueda("Error de Red/IO", e_io.getMessage(), nombreFuente));
             e_io.printStackTrace();
-        } catch (JSONException e_json) { // Renombrar para evitar conflicto
+        } catch (JSONException e_json) { // Renombrar variable para evitar conflicto de nombres
             System.err.println("Agente " + myAgent.getLocalName() + " (" + nombreFuente + ") - Error al parsear JSON de la API: " + e_json.getMessage());
             resultados.add(new ResultadoBusqueda("Error de Formato JSON", e_json.getMessage(), nombreFuente));
             e_json.printStackTrace();
@@ -258,15 +256,9 @@ public class ComportamientoBusquedaNewsAPI extends Behaviour {
                 SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                 Date date = inputFormat.parse(dateStr);
                 return outputFormat.format(date);
-            }
-        } catch (Exception e_date) { // Renombrar para evitar conflicto
+            }        } catch (Exception e_date) { // Renombrar variable para evitar conflicto de nombres
             System.err.println("Error al formatear fecha: " + dateStr + " - " + e_date.getMessage());
         }
         return "";
-    }
-    
-    @Override
-    public boolean done() {
-        return terminado;
     }
 }
