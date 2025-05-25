@@ -221,10 +221,12 @@ public class ComportamientoBusqueda extends CyclicBehaviour {
                               for (int i = 0; i < numQuestions; i++) {
                                 JSONObject question = questions.getJSONObject(i);
                                 String questionText = question.optString("question", "Sin pregunta");
+                                System.out.println("Original questionText from API: " + questionText); // DEBUG
                                 String displayedUrl = question.optString("displayed_url", "");
                                 
                                 // Limpiar texto repetido en la pregunta (si aplica)
-                                questionText = questionText.split("\\\\?")[0] + "?";
+                                questionText = questionText.split("\\\\")[0] + "?";
+                                System.out.println("Processed questionText: " + questionText); // DEBUG
                                 
                                 // Crear una URL de búsqueda de Google para la pregunta
                                 String searchUrl = "";
