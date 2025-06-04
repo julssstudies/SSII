@@ -34,7 +34,7 @@ public class ComportamientoBusquedaNewsAPI extends CyclicBehaviour {
     private String nombreFuente;
     
     // Configuración de la API EventRegistry (anteriormente NewsAPI.ai)
-    private static final String NEWSAPI_API_KEY = "3658dc14-0f61-45ae-bba9-20f8b2acc499";
+    private static final String NEWSAPI_API_KEY = [API KEY];  // Reemplazar con tu clave de API de EventRegistry
     // URL para buscar artículos por palabra clave
     private static final String NEWSAPI_API_URL = "https://eventregistry.org/api/v1/article/getArticles";
 

@@ -30,7 +30,7 @@ public class ComportamientoBusqueda extends CyclicBehaviour {
     private static final long serialVersionUID = 1L;
     
     private String nombreFuente;
-    private static final String SERPSTACK_API_KEY = "c9c72f659c07d23349f0c34566b14114";
+    private static final String SERPSTACK_API_KEY = [API KEY AQUÍ]; // Reemplazar con la clave de API real
     private static final String SERPSTACK_API_URL = "http://api.serpstack.com/search";
 
     /**
